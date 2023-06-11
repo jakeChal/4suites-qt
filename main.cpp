@@ -4,39 +4,62 @@
 #include <QWidget>
 #include <QScreen>
 
+#include "foursuites.h"
+#include "fadinglabel.h"
 
-void onButton1Clicked() {
-    qDebug() << "Button 1 was clicked!";
-}
-
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     QApplication app(argc, argv);
+    // Create the network manager
 
     // Create a QWidget as the main window
     QWidget window;
 
+    FourSuites FourSuitesManager;
+    FourSuitesManager.set_credentials("foo@example.com", "myPassword"); // Use your credentials here!
+
+    FadingLabel label(&window);
+    label.setFadingOptions(2000, 1000, QEasingCurve::Linear);
+    label.setText("Door opened!");
     // Create a QVBoxLayout to arrange the buttons vertically
     QVBoxLayout layout;
 
-    QScreen *screen = QGuiApplication::primaryScreen();    // Create the first button
+    QScreen *screen = QGuiApplication::primaryScreen(); // Create the first button
     QRect screenGeometry = screen->geometry();
-    int screenWidth = screenGeometry.width();
-    int screenHeight = screenGeometry.height();
 
-    QPushButton button1("Main Door");
-//    button1.setFixedWidth(screenWidth * 0.8); // Set the button width as 80% of the screen width
-    button1.setFixedHeight(screenHeight * 0.3); // Set the button width as 80% of the screen width
+    FourSuitesManager.authenticate();
 
-    QObject::connect(&button1, &QPushButton::clicked, &onButton1Clicked);
-    layout.addWidget(&button1);
+    // Main door
+    QPushButton buttonMainDoor("Main entrance");
+    QObject::connect(&buttonMainDoor, &QPushButton::clicked, [&FourSuitesManager, &label]() { //
+        FourSuitesManager.open_door(Doors::MAIN_ENTRANCE);
+        label.startFading(1);
+    });
+    layout.addWidget(&buttonMainDoor);
 
-//    // Create the second button
-//    QPushButton button2("Bikes Door");
-//    layout.addWidget(&button2);
+    // Bike door
+    QPushButton buttonBikeDoor("Bikes");
+    QObject::connect(&buttonBikeDoor, &QPushButton::clicked, [&FourSuitesManager, &label]() { //
+        FourSuitesManager.open_door(Doors::BIKE_PARKING);
+        label.startFading(1);
+    });
+    layout.addWidget(&buttonBikeDoor);
 
-//    // Create the third button
-//    QPushButton button3("De Hoven Mall");
-//    layout.addWidget(&button3);
+    // Mall door
+    QPushButton buttonMall("De Hoven");
+    QObject::connect(&buttonMall, &QPushButton::clicked, [&FourSuitesManager, &label]() { //
+        FourSuitesManager.open_door(Doors::MALL);
+        label.startFading(1);
+    });
+    layout.addWidget(&buttonMall);
+
+    // Mall door
+    QPushButton buttonMeters("Meters");
+    QObject::connect(&buttonMeters, &QPushButton::clicked, [&FourSuitesManager, &label]() { //
+        FourSuitesManager.open_door(Doors::METER_CABINETS);
+        label.startFading(1);
+    });
+    layout.addWidget(&buttonMeters);
 
     // Set the layout on the main window
     window.setLayout(&layout);
